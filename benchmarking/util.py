@@ -9,7 +9,7 @@ import numpy as np
 import matplotlib as mpl
 
 import time
-from datetime import datetime
+from datetime import datetime 
 
 import pprint
 
@@ -47,6 +47,28 @@ def build_query_listings_join_reviews(date1, date2):
     ORDER BY l.id;
     """
     return q24 + date1 + q25 + date2 + q26
+
+def build_query_text_search_with_index(date1,date2,word):
+    q27 = """
+    SELECT COUNT(*)
+    FROM reviews r
+    WHERE comments_tsv @@ to_tsquery('"""
+    q28 = """')
+    AND datetime >= '"""
+    q29 = """'
+    AND datetime <= '"""
+    return q27 + word + q28 + date1 + q29 + date2 + "';"
+
+def build_query_text_search_without_index(date1,date2,word):
+    q30 = """
+    SELECT COUNT(*)
+    FROM reviews r
+    WHERE comments ILIKE('%%"""
+    q31 = """%%')
+    AND datetime >= '"""
+    q32 = """'
+    AND datetime <= '"""
+    return q30 + word + q31 + date1 + q32 + date2 + "';"
 
 def time_diff(time1, time2):
     return (time2-time1).total_seconds()
@@ -132,6 +154,7 @@ def full_value_summary(db_eng, query, query_name, spec, all_indexes, count, json
     # drop unused indexes
     for index in all_indexes:
         if index not in spec:
+            print(index[0],index[1])
             add_drop_index(db_eng, 'drop', index[0], index[1])
             
     # add indexes to the corresponding tables
