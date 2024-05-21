@@ -8,6 +8,16 @@ SET datetime = to_timestamp((TO_CHAR(date::date, 'YYYY-MM-DD') || ' 12:00:00'), 
 alter table reviews 
 add column comments_tsv tsvector;
 
+with yrs as 
+(
+select datetime, cast(date_part('Year', datetime) as varchar) as yr
+from reviews
+)
+select count(datetime), yr
+from yrs
+group by yr
+order by yr
+
 --step3b
 update reviews 
 set comments_tsv = to_tsvector(comments);
