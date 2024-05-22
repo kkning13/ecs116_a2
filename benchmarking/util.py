@@ -154,7 +154,7 @@ def full_value_summary(db_eng, query, query_name, spec, all_indexes, count, json
     # drop unused indexes
     for index in all_indexes:
         if index not in spec:
-            print(index[0],index[1])
+            # print(index[0],index[1])
             add_drop_index(db_eng, 'drop', index[0], index[1])
             
     # add indexes to the corresponding tables
@@ -166,6 +166,52 @@ def full_value_summary(db_eng, query, query_name, spec, all_indexes, count, json
 
     # create these description_keys
     key_value = build_index_description_key(all_indexes, spec)
+
+    # before modification: get previous data in perf_summary first
+    if query_name in perf_summary:
+        perf_dict = perf_summary[query_name]
+    else:
+        perf_dict = {}
+    
+    # actually complete the modification
+    perf_dict[key_value] = perf_profile
+    perf_summary[query_name] = perf_dict
+
+    # write_perf_data(perf_summary, 'perf_summary.json')
+    write_perf_data(perf_summary, json_file_name)
+    return perf_summary
+
+def full_value_summary3b(db_eng, query, query_name, spec, all_indexes, spec_name, all_indexes_names, count, json_file_name):
+    print(query)
+    
+    # perf_summary = fetch_perf_data('perf_summary.json')
+    perf_summary = fetch_perf_data(json_file_name)
+
+    # drop unused indexes
+    for index in all_indexes:
+        if index not in spec:
+            # print(index[0],index[1])
+            add_drop_index(db_eng, 'drop', index[0], index[1])
+            
+    # add indexes to the corresponding tables
+    for index in spec:
+        add_drop_index(db_eng, 'add', index[0], index[1])
+        # print(add_drop_index(db_eng, 'add', index[0], index[1]))
+
+    # get run time stats
+    print((spec, spec_name))
+    q_show_indexes = f'''
+    select *
+    from pg_indexes
+    where tablename = 'reviews';
+    '''
+    with db_eng.connect() as conn:
+        result = conn.execute(sql_text(q_show_indexes)).all()
+        print(result)
+    perf_profile = get_run_time_stats_single_query(db_eng, count, query)
+
+    # create these description_keys
+    key_value = build_index_description_key(all_indexes_names, spec_name)
 
     # before modification: get previous data in perf_summary first
     if query_name in perf_summary:
