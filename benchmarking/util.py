@@ -70,6 +70,50 @@ def build_query_text_search_without_index(date1,date2,word):
     AND datetime <= '"""
     return q30 + word + q31 + date1 + q32 + date2 + "';"
 
+def build_query_update_datetimes_neigh_group_add(neigh_group):
+    q33 = """
+    UPDATE reviews r 
+    SET datetime = datetime + interval '5 days' 
+    FROM listings l 
+    WHERE l.id = r.listing_id 
+    AND l.neighbourhood_group = '"""
+    q34 = """'
+    RETURNING 'done';"""
+    return q33 + neigh_group + q34
+
+def build_query_update_datetimes_neigh_group_minus(neigh_group):
+    q33 = """
+    UPDATE reviews r 
+    SET datetime = datetime - interval '5 days' 
+    FROM listings l 
+    WHERE l.id = r.listing_id 
+    AND l.neighbourhood_group = '"""
+    q34 = """'
+    RETURNING 'done';"""
+    return q33 + neigh_group + q34
+
+def build_query_update_datetimes_neigh_add(neigh):
+    q33 = """
+    UPDATE reviews r 
+    SET datetime = datetime + interval '5 days' 
+    FROM listings l 
+    WHERE l.id = r.listing_id 
+    AND l.neighbourhood = '"""
+    q34 = """'
+    RETURNING 'done';"""
+    return q33 + neigh + q34
+
+def build_query_update_datetimes_neigh_minus(neigh):
+    q33 = """
+    UPDATE reviews r 
+    SET datetime = datetime - interval '5 days' 
+    FROM listings l 
+    WHERE l.id = r.listing_id 
+    AND l.neighbourhood = '"""
+    q34 = """'
+    RETURNING 'done';"""
+    return q33 + neigh + q34
+
 def time_diff(time1, time2):
     return (time2-time1).total_seconds()
 
