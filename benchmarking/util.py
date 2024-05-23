@@ -70,50 +70,6 @@ def build_query_text_search_without_index(date1,date2,word):
     AND datetime <= '"""
     return q30 + word + q31 + date1 + q32 + date2 + "';"
 
-def build_query_update_datetimes_neigh_group_add(neigh_group):
-    q33 = """
-    UPDATE reviews r 
-    SET datetime = datetime + interval '5 days' 
-    FROM listings l 
-    WHERE l.id = r.listing_id 
-    AND l.neighbourhood_group = '"""
-    q34 = """'
-    RETURNING 'done';"""
-    return q33 + neigh_group + q34
-
-def build_query_update_datetimes_neigh_group_minus(neigh_group):
-    q33 = """
-    UPDATE reviews r 
-    SET datetime = datetime - interval '5 days' 
-    FROM listings l 
-    WHERE l.id = r.listing_id 
-    AND l.neighbourhood_group = '"""
-    q34 = """'
-    RETURNING 'done';"""
-    return q33 + neigh_group + q34
-
-def build_query_update_datetimes_neigh_add(neigh):
-    q33 = """
-    UPDATE reviews r 
-    SET datetime = datetime + interval '5 days' 
-    FROM listings l 
-    WHERE l.id = r.listing_id 
-    AND l.neighbourhood = '"""
-    q34 = """'
-    RETURNING 'done';"""
-    return q33 + neigh + q34
-
-def build_query_update_datetimes_neigh_minus(neigh):
-    q33 = """
-    UPDATE reviews r 
-    SET datetime = datetime - interval '5 days' 
-    FROM listings l 
-    WHERE l.id = r.listing_id 
-    AND l.neighbourhood = '"""
-    q34 = """'
-    RETURNING 'done';"""
-    return q33 + neigh + q34
-
 def time_diff(time1, time2):
     return (time2-time1).total_seconds()
 
@@ -224,3 +180,34 @@ def full_value_summary(db_eng, query, query_name, spec, all_indexes, count, json
     # write_perf_data(perf_summary, 'perf_summary.json')
     write_perf_data(perf_summary, json_file_name)
     return perf_summary
+
+# Function to rename keys and extract the year
+def rename_keys(data):
+    new_data = {}
+    for key, value in data.items():
+        if key.startswith("listings_join_reviews_"):
+            year = key.split("_")[-1]
+            new_data[year] = value
+        else:
+            new_data[key] = value
+    return new_data
+
+def rename_keys_text_search(data, word):
+    new_data = {}
+    for key, value in data.items():
+        if key.startswith(f"{word}_"):
+            year = key.split("_")[-1]
+            new_data[year] = value
+        else:
+            new_data[key] = value
+    return new_data
+
+def rename_keys_updates(data):
+    new_data = {}
+    for key, value in data.items():
+        if key.startswith("update_datetimes_query_"):
+            year = key.split("_")[-1]
+            new_data[year] = value
+        else:
+            new_data[key] = value
+    return new_data
