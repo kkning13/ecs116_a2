@@ -40,3 +40,9 @@ from reviews r
 where comments ilike '%awesome%'
 and datetime >='2023-01-01';
 and datetime <='2023-12-31'; 
+
+select left(to_char(date, 'YYYY-MM-DD'),4) as year, count(*)
+from reviews r
+where comments_tsv @@ to_tsquery('horrible')
+group by year 
+order by year
